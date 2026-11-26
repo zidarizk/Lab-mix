@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LabMix Formula - حاسبة التركيبات الصيدلانية</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
+        body { font-family: 'Cairo', sans-serif; }
+        @media print {
+            body * { visibility: hidden; }
+            #printSection, #printSection * { visibility: visible; }
+            #printSection { position: absolute; left: 0; top: 0; width: 100%; }
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen p-4 sm:p-6">
+    <div class="max-w-4xl mx-auto space-y-6">
+        
+        <!-- Header -->
+        <header class="bg-slate-800 border border-slate-700 p-6 rounded-2xl shadow-xl flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div>
+                <h1 class="text-2xl font-bold text-emerald-400">🧪 LabMix Formula</h1>
+                <p class="text-slate-400 text-sm mt-1">حاسبة التركيبات الصيدلانية، إدارة التكاليف، ومولد الملصقات الذكي</p>
+            </div>
+            <div class="bg-slate-900 px-4 py-2 rounded-xl border border-slate-700 text-xs text-emerald-300">
+                إصدار الصيدليات المعتمد
+            </div>
+        </header>
+
+        <!-- Main Form & Calculator -->
+        <main class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            <!-- Input Card -->
+            <div class="bg-slate-800 border border-slate-700 p-6 rounded-2xl shadow-xl space-y-4">
+                <h2 class="text-lg font-semibold text-emerald-300 border-b border-slate-700 pb-2">بيانات التحضير والتركيبة</h2>
+                
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-1">اسم التركيبة / المنتج:</label>
+                    <input type="text" id="formulaName" value="سبراي تساقط الشعر (فيناسترايد)" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-emerald-500">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-1">المادة الفعالة (جم / مل):</label>
+                        <input type="number" id="activeSubstance" value="0.5" step="0.01" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-1">التركيز التجاري للقرص/المادة (مجم):</label>
+                        <input type="number" id="tabletStrength" value="5" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-emerald-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-1">حجم العبوة النهائية (مل / جم):</label>
+                    <input type="number" id="totalVolume" value="60" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-emerald-500">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-1">تكلفة المواد الخام (جنية):</label>
+                        <input type="number" id="materialCost" value="45" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-1">أجر المعمل والتحضير (جنية):</label>
+                        <input type="number" id="labFee" value="20" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-emerald-500">
+                    </div>
+                </div>
+
+                <button onclick="calculateFormula()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl transition shadow-lg mt-2">
+                    احسب التكاليف والجرعات فوراً
+                </button>
+            </div>
+
+            <!-- Results & Label Card -->
+            <div class="space-y-6">
+                <!-- Calculations Output -->
+                <div class="bg-slate-800 border border-slate-700 p-6 rounded-2xl shadow-xl space-y-3">
+                    <h2 class="text-lg font-semibold text-emerald-300 border-b border-slate-700 pb-2">نتائج التحليل والحسابات</h2>
+                    <div class="flex justify-between py-1 border-b border-slate-700/50">
+                        <span class="text-slate-400">عدد الأقراص / الوحدات المطلوبة:</span>
+                        <span id="resTablets" class="font-bold text-white">--</span>
+                    </div>
+                    <div class="flex justify-between py-1 border-b border-slate-700/50">
+                        <span class="text-slate-400">إجمالي التكلفة الفعلية:</span>
+                        <span id="resTotalCost" class="font-bold text-amber-400">-- جنيه</span>
+                    </div>
+                    <div class="flex justify-between py-1">
+                        <span class="text-slate-400">سعر البيع المقترح (ربح 40%):</span>
+                        <span id="resSuggestedPrice" class="font-bold text-emerald-400 text-lg">-- جنيه</span>
+                    </div>
+                </div>
+
+                <!-- Printable Label Preview -->
+                <div class="bg-slate-800 border border-slate-700 p-6 rounded-2xl shadow-xl space-y-4">
+                    <h2 class="text-lg font-semibold text-emerald-300 border-b border-slate-700 pb-2">معاينة ملصق العبوة للطباعة</h2>
+                    
+                    <div id="printSection" class="bg-white text-slate-900 p-4 rounded-xl border-2 border-dashed border-slate-400 space-y-2">
+                        <div class="text-center border-b border-slate-300 pb-2">
+                            <h3 id="lblPharmacy" class="font-bold text-sm text-slate-800">صيدليات د. باسم نور الدين الشافعي</h3>
+                            <p id="lblTitle" class="text-xs font-semibold text-emerald-700">سبراي تساقط الشعر (فيناسترايد)</p>
+                        </div>
+                        <div class="text-[11px] space-y-1 text-slate-700">
+                            <p><strong>التركيبة:</strong> تحضير معملي خاص دقيق</p>
+                            <p><strong>الحجم:</strong> <span id="lblVolume">60</span> مل | <strong>الاستخدام:</strong> للاستخدام الخارجي فقط</p>
+                            <p><strong>تاريخ التحضير:</strong> <span id="lblDate">--/--/----</span></p>
+                        </div>
+                        <div class="text-[9px] text-center text-slate-500 pt-1 border-t border-slate-200">
+                            يحفظ في مكان بارد وجاف بعيداً عن متناول الأطفال
+                        </div>
+                    </div>
+
+                    <button onclick="window.print()" class="w-full bg-slate-700 hover:bg-slate-600 text-white font-semibold py-2.5 rounded-xl transition">
+                        🖨️ طباعة الملصق فقط
+                    </button>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        function calculateFormula() {
+            const name = document.getElementById('formulaName').value;
+            const active = parseFloat(document.getElementById('activeSubstance').value) || 0;
+            const strength = parseFloat(document.getElementById('tabletStrength').value) || 1;
+            const volume = parseFloat(document.getElementById('totalVolume').value) || 0;
+            const matCost = parseFloat(document.getElementById('materialCost').value) || 0;
+            const labFee = parseFloat(document.getElementById('labFee').value) || 0;
+
+            // Calculations
+            // Assuming active is total mass needed in mg if strength is in mg, let's adjust ratio calculation safely
+            let totalActiveNeededMg = active * 1000; // assuming active entered in grams, converting to mg
+            let tabletsNeeded = Math.ceil((active / strength)); 
+            if(strength >= 100) { tabletsNeeded = Math.ceil(active / strength); } // safety check
+
+            let totalCost = matCost + labFee;
+            let suggestedPrice = Math.ceil(totalCost * 1.4); // 40% margin
+
+            // Update UI
+            document.getElementById('resTablets').innerText = tabletsNeeded + " وحدة / قرص";
+            document.getElementById('resTotalCost').innerText = totalCost.toFixed(2) + " جنيه";
+            document.getElementById('resSuggestedPrice').innerText = suggestedPrice.toFixed(2) + " جنيه";
+
+            // Update Label
+            document.getElementById('lblTitle').innerText = name;
+            document.getElementById('lblVolume').innerText = volume;
+            
+            const today = new Date().toLocaleDateString('ar-EG');
+            document.getElementById('lblDate').innerText = today;
+        }
+
+        // Run initial calculation
+        calculateFormula();
+    </script>
+</body>
+                                                                                </html>
